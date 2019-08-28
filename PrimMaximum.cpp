@@ -35,18 +35,14 @@ class Heap{
 public:
 	vii heap;
 	int size;
-	Heap(int s){
-		size = 0;
-		heap.resize(s);
-		heap.push_back(ii(0,0));
-	}
 	Heap(){
 		heap.push_back(ii(0,0));
 		size= 0;
 	}
 	void push(ii x){
-		heap.push_back(x);
 		size++;
+		heap.resize(size+1);
+		heap[size] = x;
 		int key = size;
 		int parent = getParent(key);
 		while(parent>=1 && (heap[key])>(heap[parent])){
@@ -56,7 +52,6 @@ public:
 			key = parent;
 			parent = getParent(key);
 		}
-		//cout<<heap[size].first<<" "<<heap[size].second<<endl;
 	}
 	ii top(){
 		return heap[1];
@@ -83,20 +78,29 @@ public:
 			ii item = heap[1];
 			heap[1] = heap[size];
 			size--;
+			heap.resize(size);
 			max_heapify(1);
 			return item;
 		}
 		return ii(INT_MIN,INT_MIN);
 	}
-	void Swap(Heap h){
-		auto tmp = heap;
-		heap = h.heap;
-		h.heap = tmp;
-		auto s = size;
-		size = h.size;
-		h.size = s;
+	void Increase_Priority(int z,int w){
+		for(int i =1;i<=size;i++){
+			if(heap[i].first==z){
+				cout<<i<<endl;
+				if(i!=size) {heap[i] = heap[size];
+				heap.resize(size);
+				size--;
+				this->max_heapify(i);
+				}else{
+					heap.resize(size);
+					size--;
+				}
+				this->push(make_pair(z,w));
+				break;
+			}
+		}
 	}
-	
 };
 typedef Heap pii;
 int V;
@@ -104,16 +108,6 @@ pii criar_pq(int custo[]){
 	pii h;
 	for(int v = 0; v<V ; v++) h.push (ii (v,custo[v]));
 	return h;
-}
-pii increased_priority(pii h,int v,int custo){
-	pii tmp;
-	while(!h.empty()){
-		ii iii = h.top();
-		h.pop();
-		if(iii.first==v) tmp.push(ii (iii.first,custo));
-		else tmp.push(ii(iii.first,iii.second));
-	}
-	return tmp;
 }
 int* Prim(graph g,int v0){
 	int custo[V],*prev = new int[V]; 
@@ -128,15 +122,12 @@ int* Prim(graph g,int v0){
 	pii H = criar_pq(custo);
 	while(!H.empty()){
 		int v = H.top().first;
-		//cout<<"prev["<<v<<"] :"<<prev[v]<<endl;
 		mstSet[v] = true;
 		H.pop();
-		//cout<<g[v][0].first<<endl;
 		for(auto z : g[v]){
 			if(custo[z.first] < z.second && !mstSet[z.first]){
 				custo[z.first] = z.second;
-				auto tmp = increased_priority(H,z.first,custo[z.first]);
-				H.Swap(tmp);
+				H.Increase_Priority(z.first,custo[z.first]);
 				prev[z.first] = v;
 			}
 		}
@@ -147,21 +138,25 @@ void addEdge(graph *g,int v1,int v2,int w){
 	(g->at(v1)).push_back(ii(v2,w));
 	(g->at(v2)).push_back(ii(v1,w));
 }
+
+
+
 int main(){	
+	cout<<"Diga o numero de vertices do grafo\n";
+	cin>>V;
+	cout<<"Diga o numero de arestas do grafo\n";
+	int E;
+	cin>>E;
 	graph g;
-	g.resize(6);
-	addEdge(&g,0,1,4);
-	addEdge(&g,1,2,3);
-	addEdge(&g,2,0,1);
-	addEdge(&g,2,3,2);
-	addEdge(&g,3,0,4);
-	addEdge(&g,3,1,4);
-	addEdge(&g,4,5,5);
-	addEdge(&g,5,2,4);
-	addEdge(&g,5,3,6);
-	V = 6;
+	g.resize(V);
+	int a,b,w;
+	for(int i =0;i<E;i++){
+		cout<<"Diga os vertices e peso da aresta\n";
+		cin>>a>>b>>w;
+		addEdge(&g,a,b,w);
+	}
 	int* t = Prim(g,0);
-	for (int i = 0; i< 6;i++)
+	for (int i = 0; i< V;i++)
 	cout<<i<<" pai :"<<t[i]<<endl;
 	return 0;
 }
