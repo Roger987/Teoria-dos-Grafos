@@ -87,7 +87,6 @@ public:
 	void Increase_Priority(int z,int w){
 		for(int i =1;i<=size;i++){
 			if(heap[i].first==z){
-				cout<<i<<endl;
 				if(i!=size) {heap[i] = heap[size];
 				heap.resize(size);
 				size--;
